@@ -41,13 +41,20 @@ const getCart = async (req, res) => {
 const addToCart = async (req, res) => {
   try {
     const { productId, quantity = 1, isRent = false } = req.body;
+    const requestedQuantity = Number(quantity);
 
     if (!productId) {
       return res.status(400).json({ message: 'productId is required' });
     }
+    if (!Number.isInteger(requestedQuantity) || requestedQuantity < 1) {
+      return res.status(400).json({ message: 'quantity must be a positive whole number' });
+    }
 
     const product = await Product.findOne({ Id: Number(productId) });
     if (!product) return res.status(404).json({ message: 'Product not found' });
+    if (isRent && !product.isRent) {
+      return res.status(400).json({ message: 'This product is not available for rent' });
+    }
 
     let cart = await Cart.findOne({ user: req.user.id });
     if (!cart) cart = new Cart({ user: req.user.id, items: [] });
@@ -57,9 +64,9 @@ const addToCart = async (req, res) => {
     );
 
     const currentQty = existingIndex >= 0 ? cart.items[existingIndex].quantity : 0;
-    const newQty = currentQty + Number(quantity);
+    const newQty = currentQty + requestedQuantity;
 
-    if (!isRent && newQty > product.quantity) {
+    if (newQty > product.quantity) {
       return res.status(400).json({
         message: `Only ${product.quantity - currentQty} more unit(s) available in stock`
       });
@@ -69,7 +76,7 @@ const addToCart = async (req, res) => {
       cart.items[existingIndex].quantity = newQty;
       cart.items[existingIndex].price = product.price;
     } else {
-      cart.items.push({ product: product._id, quantity: Number(quantity), price: product.price, isRent });
+      cart.items.push({ product: product._id, quantity: requestedQuantity, price: product.price, isRent });
     }
 
     await cart.save();
@@ -97,7 +104,7 @@ const incrementItem = async (req, res) => {
     );
     if (!item) return res.status(404).json({ message: 'Item not in cart' });
 
-    if (!isRent && item.quantity + 1 > product.quantity) {
+    if (item.quantity + 1 > product.quantity) {
       return res.status(400).json({ message: `Maximum available stock is ${product.quantity}` });
     }
 
@@ -146,8 +153,12 @@ const decrementItem = async (req, res) => {
 const updateCartItem = async (req, res) => {
   try {
     const { productId, quantity, isRent = false } = req.body;
+    const requestedQuantity = Number(quantity);
     if (!productId || quantity === undefined) {
       return res.status(400).json({ message: 'productId and quantity are required' });
+    }
+    if (!Number.isInteger(requestedQuantity)) {
+      return res.status(400).json({ message: 'quantity must be a whole number' });
     }
 
     const product = await Product.findOne({ Id: Number(productId) });
@@ -161,13 +172,13 @@ const updateCartItem = async (req, res) => {
     );
     if (itemIndex === -1) return res.status(404).json({ message: 'Item not in cart' });
 
-    if (Number(quantity) <= 0) {
+    if (requestedQuantity <= 0) {
       cart.items.splice(itemIndex, 1);
     } else {
-      if (!isRent && Number(quantity) > product.quantity) {
+      if (requestedQuantity > product.quantity) {
         return res.status(400).json({ message: `Only ${product.quantity} unit(s) available in stock` });
       }
-      cart.items[itemIndex].quantity = Number(quantity);
+      cart.items[itemIndex].quantity = requestedQuantity;
       cart.items[itemIndex].price = product.price;
     }
 

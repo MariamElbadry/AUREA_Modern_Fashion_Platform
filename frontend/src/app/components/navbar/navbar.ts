@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -33,11 +33,15 @@ export class Navbar implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private cartService: CartService
+    private cartService: CartService,
+    private cdr: ChangeDetectorRef
   ) {
+    this.activePage = this.router.url.replace('/', '').split('?')[0] || 'home';
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.activePage = event.urlAfterRedirects.replace('/', '').split('?')[0] || 'home';
+        this.mobileMenuOpen = false;
+        this.accountMenuOpen = false;
       }
     });
   }
@@ -59,10 +63,12 @@ export class Navbar implements OnInit, OnDestroy {
           this.isDesigner = false;
           this.cartCount = 0;
         }
+        this.cdr.markForCheck();
       }
     });
     this.cartSub = this.cartService.cartCount$.subscribe(count => {
       this.cartCount = count;
+      this.cdr.markForCheck();
     });
   }
 
@@ -71,7 +77,7 @@ export class Navbar implements OnInit, OnDestroy {
     this.cartSub?.unsubscribe();
   }
 
-  navigate(page: string): void { this.mobileMenuOpen = false; this.router.navigate([page]); }
+  navigate(page: string): void { this.mobileMenuOpen = false; this.accountMenuOpen = false; this.router.navigate([page]); }
   toggleMobileMenu(): void { this.mobileMenuOpen = !this.mobileMenuOpen; }
   toggleAccountMenu(): void { this.accountMenuOpen = !this.accountMenuOpen; }
   openAuth(): void { this.router.navigate(['auth']); }

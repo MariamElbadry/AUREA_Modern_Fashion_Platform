@@ -9,10 +9,16 @@ export class CartService {
   cartCount$ = this.cartCountSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    this.refreshCount();
+    if (this.hasAuthToken()) {
+      this.refreshCount();
+    }
   }
 
   refreshCount(): void {
+    if (!this.hasAuthToken()) {
+      this.cartCountSubject.next(0);
+      return;
+    }
     this.getCart().subscribe({ 
       next: (cart: any) => {
         const count = cart.items?.reduce((s: number, i: any) => s + i.quantity, 0) || 0;
@@ -62,5 +68,13 @@ export class CartService {
     return this.http.delete(`${this.apiUrl}/clear`).pipe(
       tap(() => this.cartCountSubject.next(0))
     );
+  }
+
+  resetCount(): void {
+    this.cartCountSubject.next(0);
+  }
+
+  private hasAuthToken(): boolean {
+    return typeof window !== 'undefined' && !!window.localStorage?.getItem('authToken');
   }
 }

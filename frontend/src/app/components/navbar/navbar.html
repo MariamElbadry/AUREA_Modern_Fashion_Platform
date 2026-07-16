@@ -27,7 +27,7 @@
       <button class="link signin-btn-nav" *ngIf="!isLoggedIn" (click)="openAuth()">Sign in</button>
 
       <div class="acct-menu" *ngIf="isLoggedIn">
-        <button class="acct-btn" (click)="toggleAccountMenu()">
+        <button class="acct-btn" (click)="toggleAccountMenu()" [attr.aria-expanded]="accountMenuOpen" aria-label="Open account menu">
           <span class="dot"></span>
           <span>{{ accountName }}</span>
         </button>
@@ -44,13 +44,17 @@
       </div>
     </div>
 
-    <button class="menu-btn" (click)="toggleMobileMenu()">Menu</button>
+    <button class="menu-btn" (click)="toggleMobileMenu()" [attr.aria-expanded]="mobileMenuOpen" aria-controls="mobile-navigation">
+      {{ mobileMenuOpen ? 'Close' : 'Menu' }}
+    </button>
   </div>
 
-  <div class="mobile-menu" [class.on]="mobileMenuOpen">
+  <div id="mobile-navigation" class="mobile-menu" [class.on]="mobileMenuOpen">
     <button class="link nav-link" (click)="navigate('home')">Home</button>
     <button class="link nav-link" (click)="navigate('shop')">Shop</button>
+    <button class="link nav-link" (click)="navigate('rent')">Rent</button>
     <button class="link nav-link" (click)="navigate('designers')">Designers</button>
+    <button class="link nav-link" (click)="navigate('studio')">Style Studio</button>
     <button class="link nav-link" (click)="navigate('cart')" *ngIf="isLoggedIn">Cart ({{ cartCount }})</button>
     <button class="link nav-link" (click)="navigate('orders')" *ngIf="isLoggedIn">My Orders</button>
     <button class="link signin-btn-nav" *ngIf="!isLoggedIn" (click)="openAuth()">Sign in</button>

@@ -75,6 +75,7 @@ export class Cart implements OnInit {
         this.cart = { items: [] };
         this.isPlacingOrder = false;
         this.successMessage = 'Order placed successfully!';
+        this.cartService.resetCount();
         this.cdr.detectChanges();
         setTimeout(() => this.router.navigate(['/orders']), 1500);
       },

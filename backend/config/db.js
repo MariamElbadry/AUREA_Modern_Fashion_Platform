@@ -1,10 +1,8 @@
 const mongoose = require('mongoose');
 const dns = require('dns');
 
-// Fix for Windows DNS issue: "Unlisted TLDs in URLs are not supported"
-// Forces IPv4 first and uses Google's public DNS to resolve MongoDB Atlas hostnames
+// Prefer IPv4 on Windows while preserving the machine's configured DNS resolver.
 dns.setDefaultResultOrder('ipv4first');
-dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
 
 const connectDB = async () => {
   try {

@@ -1,22 +1,35 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, OnDestroy } from '@angular/core';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Navbar } from './components/navbar/navbar';
 import { Footer } from './components/footer/footer';
-import { Shop } from './components/shop/shop';
-import { Products } from './components/products/products';
-import { Home } from './components/home/home'
-import { New } from './components/new/new'
-import { Auth } from './components/auth/auth'
-import { Register } from './components/register/register'
-import { Designers } from './components/designers/designers'
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone : true,
-  imports: [RouterOutlet, Navbar, Footer, Shop, Products, Home, New, Auth, Register, Designers],
+  imports: [RouterOutlet, Navbar, Footer],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
-  protected readonly title = signal('frontend');
+export class App implements OnDestroy {
+  showSiteChrome = true;
+  private readonly routerSub: Subscription;
+
+  constructor(private router: Router) {
+    this.updateSiteChrome(this.router.url);
+    this.routerSub = this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.updateSiteChrome(event.urlAfterRedirects);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.routerSub.unsubscribe();
+  }
+
+  private updateSiteChrome(url: string): void {
+    const route = url.split('?')[0].split('/').filter(Boolean)[0] ?? '';
+    this.showSiteChrome = !['auth', 'register', 'admin'].includes(route);
+  }
 }

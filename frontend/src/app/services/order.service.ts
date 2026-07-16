@@ -11,6 +11,10 @@ export class OrderService {
     return this.http.get<any[]>(this.apiUrl);
   }
 
+  getAllOrders(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/all`);
+  }
+
   getOrder(id: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/${id}`);
   }
@@ -21,5 +25,9 @@ export class OrderService {
 
   cancelOrder(id: string): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}/cancel`, {});
+  }
+
+  updateOrderStatus(id: string, status: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}/status`, { status });
   }
 }
