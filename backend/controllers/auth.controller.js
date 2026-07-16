@@ -12,7 +12,7 @@ const register = async (req, res) => {
     if (!email || !emailRegex.test(email)) {
       return res.status(400).json({ message: 'Invalid email format' });
     }
-    const normalizedEmail = email.toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
 
     // Validate password strength
     if (!password || password.length < 6) {
@@ -55,8 +55,12 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (typeof email !== 'string' || !email.trim() || typeof password !== 'string' || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
     // Normalize email to lowercase
-    const normalizedEmail = email.toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
 
     // Find user
     const user = await User.findOne({ email: normalizedEmail }).select('+password');
