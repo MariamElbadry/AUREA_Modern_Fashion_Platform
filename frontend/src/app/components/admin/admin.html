@@ -16,6 +16,11 @@
         <span class="nav-icon">◈</span>
         <span>Products</span>
       </button>
+      <button class="nav-item" [class.active]="activeTab === 'orders'" (click)="activeTab = 'orders'">
+        <span class="nav-icon">◎</span>
+        <span>Orders</span>
+        <span class="nav-count" *ngIf="pendingOrdersCount > 0">{{ pendingOrdersCount }}</span>
+      </button>
     </nav>
 
     <div class="sidebar-footer">
@@ -183,6 +188,61 @@
           <div class="empty-desc">{{ searchTerm ? 'Try a different search term.' : 'Start by adding your first product.' }}</div>
           <button class="btn-primary" (click)="openAddModal()" *ngIf="!searchTerm">+ Add Product</button>
         </div>
+      </div>
+    </div>
+
+    <!-- ORDERS TAB -->
+    <div *ngIf="activeTab === 'orders'" class="tab-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Orders</h1>
+          <p class="page-sub">{{ orders.length }} customer order{{ orders.length === 1 ? '' : 's' }}</p>
+        </div>
+        <button class="btn-outline" type="button" (click)="loadOrders()" [disabled]="areOrdersLoading">Refresh Orders</button>
+      </div>
+
+      <div class="loading-state" *ngIf="areOrdersLoading">
+        <div class="spinner"></div>
+        Loading orders…
+      </div>
+
+      <div class="orders-admin-list" *ngIf="!areOrdersLoading && orders.length > 0">
+        <article class="admin-order-card" *ngFor="let order of orders">
+          <div class="admin-order-head">
+            <div>
+              <div class="order-number">Order #{{ order._id.slice(-8).toUpperCase() }}</div>
+              <div class="order-customer">{{ order.user?.firstName }} {{ order.user?.lastName }} · {{ order.user?.email }}</div>
+            </div>
+            <div class="order-total">${{ order.totalAmount }}</div>
+          </div>
+          <div class="admin-order-items">
+            <div class="admin-order-item" *ngFor="let item of order.items">
+              <img [src]="item.imageUrl" [alt]="item.name">
+              <div>
+                <strong>{{ item.name }}</strong>
+                <span>{{ item.quantity }} × ${{ item.price }}{{ item.isRent ? ' · Rental' : '' }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="admin-order-foot">
+            <span class="order-date">{{ order.createdAt | date:'medium' }}</span>
+            <label class="status-control">
+              <span>Status</span>
+              <select
+                [value]="order.status"
+                (change)="updateOrderStatus(order, $any($event.target).value)"
+                [disabled]="allowedOrderStatuses(order.status).length === 0 || changingOrderId === order._id">
+                <option [value]="order.status">{{ order.status | titlecase }}</option>
+                <option *ngFor="let status of allowedOrderStatuses(order.status)" [value]="status">{{ status | titlecase }}</option>
+              </select>
+            </label>
+          </div>
+        </article>
+      </div>
+
+      <div class="empty-state" *ngIf="!areOrdersLoading && orders.length === 0">
+        <div class="empty-title">No customer orders yet</div>
+        <div class="empty-desc">New orders will appear here as soon as customers place them.</div>
       </div>
     </div>
 

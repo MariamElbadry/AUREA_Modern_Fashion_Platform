@@ -1,0 +1,11 @@
+.git/
+.vercel/
+.env.local
+backend/.env
+**/node_modules/
+**/dist/
+**/.angular/
+**/*.log
+aurea.html
+AUTH_AUTHORIZATION_CRUD_REVIEW.md
+CART_ORDER_ADMIN_REVIEW.md

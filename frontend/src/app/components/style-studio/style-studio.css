@@ -1,0 +1,16 @@
+:host { display: block; }
+.studio-page {
+  box-sizing: border-box;
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  padding: clamp(60px, 8vw, 110px) max(20px, calc((100vw - 1296px) / 2));
+  background: linear-gradient(90deg, rgba(248,243,236,.97), rgba(248,243,236,.5)), url('/assets/images/tease-studio.jpg') center / cover;
+}
+.studio-copy { max-width: 720px; }
+.eyebrow { margin: 0 0 18px; color: var(--accent); font: 10px var(--mono); letter-spacing: .22em; text-transform: uppercase; }
+h1 { margin: 0; color: var(--ink); font: clamp(52px, 7vw, 94px)/.94 var(--serif); }
+h1 em { color: var(--accent); }
+.studio-copy > p:not(.eyebrow) { max-width: 570px; margin: 28px 0 32px; color: var(--muted); font-size: 16px; line-height: 1.75; }
+a { display: inline-flex; padding: 15px 25px; background: var(--accent); color: white; text-decoration: none; font: 11px var(--mono); letter-spacing: .13em; text-transform: uppercase; }
+@media(max-width:600px) { .studio-page { min-height: 680px; align-items: flex-end; background-position: 65% center; } }

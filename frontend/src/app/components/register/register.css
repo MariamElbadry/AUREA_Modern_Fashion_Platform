@@ -1,11 +1,11 @@
 .container {
     width: 100%;
-    height: 100vh;
+    min-height: 100vh;
 }
 
 .card {
     width: 100%;
-    height: 100vh;
+    min-height: 100vh;
     display: grid;
     grid-template-columns: 42% 58%;
 }
@@ -206,7 +206,7 @@ h1 {
     }
 
     .left {
-        height: 350px;
+        min-height: 260px;
     }
 
     .right {
@@ -225,6 +225,15 @@ h1 {
         flex-direction: column;
         gap: 0;
     }
+}
+
+@media(max-width:520px) {
+    .left { min-height: 170px; }
+    .right { padding: 36px 20px; align-items: flex-start; }
+    .logo { font-size: 46px; }
+    .tagline { margin-bottom: 36px; letter-spacing: 2px; }
+    h1 { font-size: 40px; }
+    .description { font-size: 15px; margin-bottom: 30px; }
 }
 
 .error-message {

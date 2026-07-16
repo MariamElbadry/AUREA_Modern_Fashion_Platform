@@ -42,6 +42,25 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'Cart is empty' });
     }
 
+    // Validate the complete cart before creating an order or clearing it.
+    for (const item of cart.items) {
+      if (!item.product) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({ message: 'A product in the cart is no longer available' });
+      }
+      if (item.quantity > item.product.quantity) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({ message: `Insufficient stock for ${item.product.name}` });
+      }
+      if (item.isRent && !item.product.isRent) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({ message: `${item.product.name} is not available for rent` });
+      }
+    }
+
     // Calculate total amount
     const totalAmount = cart.items.reduce((total, item) => {
       return total + (item.price * item.quantity);

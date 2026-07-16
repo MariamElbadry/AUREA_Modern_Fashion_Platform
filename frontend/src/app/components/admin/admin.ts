@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/product';
+import { OrderService } from '../../services/order.service';
 
 interface Toast {
   message: string;
@@ -18,14 +19,19 @@ interface Toast {
   templateUrl: './admin.html',
   styleUrl: './admin.css',
 })
-export class Admin implements OnInit {
+export class Admin implements OnInit, OnDestroy {
   currentUser: any;
-  activeTab: 'dashboard' | 'products' = 'dashboard';
+  activeTab: 'dashboard' | 'products' | 'orders' = 'dashboard';
 
   // Products state
   products: Product[] = [];
   isLoading = false;
   searchTerm = '';
+
+  // Orders state
+  orders: any[] = [];
+  areOrdersLoading = false;
+  changingOrderId: string | null = null;
 
   // Modal state
   showModal = false;
@@ -68,7 +74,9 @@ export class Admin implements OnInit {
   constructor(
     private authService: AuthService,
     private productService: ProductService,
-    private router: Router
+    private orderService: OrderService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
     this.currentUser = this.authService.getCurrentUser();
     if (!this.currentUser || this.currentUser.role !== 'admin') {
@@ -78,6 +86,11 @@ export class Admin implements OnInit {
 
   ngOnInit(): void {
     this.loadProducts();
+    this.loadOrders();
+  }
+
+  ngOnDestroy(): void {
+    clearTimeout(this.toastTimer);
   }
 
   loadProducts(): void {
@@ -86,6 +99,7 @@ export class Admin implements OnInit {
       next: (data) => {
         this.products = data;
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.isLoading = false;
@@ -108,6 +122,50 @@ export class Admin implements OnInit {
   get totalStock(): number { return this.products.reduce((s, p) => s + p.quantity, 0); }
   get rentableCount(): number { return this.products.filter(p => p.isRent).length; }
   get newArrivalsCount(): number { return this.products.filter(p => p.isNew).length; }
+  get pendingOrdersCount(): number { return this.orders.filter(order => order.status === 'pending').length; }
+
+  loadOrders(): void {
+    this.areOrdersLoading = true;
+    this.orderService.getAllOrders().subscribe({
+      next: orders => {
+        this.orders = orders;
+        this.areOrdersLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.areOrdersLoading = false;
+        this.showToast('Failed to load orders', 'error');
+      }
+    });
+  }
+
+  allowedOrderStatuses(status: string): string[] {
+    const transitions: Record<string, string[]> = {
+      pending: ['confirmed', 'cancelled'],
+      confirmed: ['shipped', 'cancelled'],
+      shipped: ['delivered', 'cancelled'],
+      delivered: [],
+      cancelled: []
+    };
+    return transitions[status] ?? [];
+  }
+
+  updateOrderStatus(order: any, status: string): void {
+    if (!status || status === order.status || this.changingOrderId) return;
+    this.changingOrderId = order._id;
+    this.orderService.updateOrderStatus(order._id, status).subscribe({
+      next: updated => {
+        const index = this.orders.findIndex(item => item._id === order._id);
+        if (index !== -1) this.orders[index] = { ...updated, user: order.user };
+        this.changingOrderId = null;
+        this.showToast(`Order status changed to ${updated.status}`, 'success');
+      },
+      error: err => {
+        this.changingOrderId = null;
+        this.showToast(err.error?.message || 'Failed to update order status', 'error');
+      }
+    });
+  }
 
   getCategoryName(catId: number): string {
     return this.categories.find(c => c.id === catId)?.name ?? 'Unknown';
@@ -212,7 +270,11 @@ export class Admin implements OnInit {
   showToast(message: string, type: 'success' | 'error'): void {
     clearTimeout(this.toastTimer);
     this.toast = { message, type };
-    this.toastTimer = setTimeout(() => this.toast = null, 3500);
+    this.cdr.detectChanges();
+    this.toastTimer = setTimeout(() => {
+      this.toast = null;
+      this.cdr.detectChanges();
+    }, 3500);
   }
 
   // --- Navigation ---

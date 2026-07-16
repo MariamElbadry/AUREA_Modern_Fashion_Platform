@@ -1,1 +1,62 @@
-<p>rent works!</p>
+<section class="rent-hero">
+  <div class="hero-copy">
+    <p class="eyebrow">AUREA Rent</p>
+    <h1>Wear the moment.<br><em>Return the rest.</em></h1>
+    <p class="intro">Borrow iconic occasion wear for the dates that matter, with flexible quantities and every rentable piece gathered in one place.</p>
+  </div>
+</section>
+
+<section class="collection" aria-labelledby="rent-collection-title">
+  <div class="wrap">
+    <header class="section-head">
+      <div>
+        <p class="eyebrow">The rental edit</p>
+        <h2 id="rent-collection-title">Available to rent</h2>
+      </div>
+      <p>{{ products.length }} curated piece{{ products.length === 1 ? '' : 's' }}</p>
+    </header>
+
+    <div class="state" *ngIf="isLoading">
+      <span class="spinner" aria-hidden="true"></span>
+      <span>Loading rental collection…</span>
+    </div>
+    <div class="state error" *ngIf="errorMessage && !isLoading">{{ errorMessage }}</div>
+
+    <div class="rent-grid" *ngIf="!isLoading && !errorMessage">
+      <article class="rent-card" *ngFor="let product of products" [class.sold-out]="product.quantity === 0">
+        <div class="image-wrap">
+          <span class="rent-chip">Rent</span>
+          <span class="sold-chip" *ngIf="product.quantity === 0">Unavailable</span>
+          <img [src]="product.imageUrl" [alt]="product.name" loading="lazy">
+        </div>
+        <div class="card-body">
+          <p class="designer">{{ product.designer }}</p>
+          <h3>{{ product.name }}</h3>
+          <div class="price-row">
+            <strong>${{ product.price }}</strong>
+            <span>{{ product.quantity }} available</span>
+          </div>
+
+          <div class="rent-actions" *ngIf="product.quantity > 0">
+            <div class="quantity-stepper" [attr.aria-label]="'Quantity for ' + product.name">
+              <button type="button" (click)="changeQuantity(product, -1)" [disabled]="quantityFor(product) === 1" [attr.aria-label]="'Decrease ' + product.name + ' quantity'">−</button>
+              <span>{{ quantityFor(product) }}</span>
+              <button type="button" (click)="changeQuantity(product, 1)" [disabled]="quantityFor(product) === product.quantity" [attr.aria-label]="'Increase ' + product.name + ' quantity'">+</button>
+            </div>
+            <button type="button" class="add-button" (click)="addToCart(product)" [disabled]="addingProductIds.has(product.Id)">
+              {{ addingProductIds.has(product.Id) ? 'Adding…' : 'Add to cart' }}
+            </button>
+          </div>
+
+          <p class="feedback" *ngIf="feedback?.productId === product.Id" [class.error]="feedback?.type === 'error'" aria-live="polite">
+            {{ feedback?.message }}
+          </p>
+        </div>
+      </article>
+    </div>
+
+    <div class="state" *ngIf="!isLoading && !errorMessage && products.length === 0">
+      No rental pieces are available yet.
+    </div>
+  </div>
+</section>

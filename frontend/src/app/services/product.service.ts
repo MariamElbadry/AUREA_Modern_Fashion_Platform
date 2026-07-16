@@ -19,6 +19,10 @@ export class ProductService {
     return this.http.get<Product>(`${this.apiUrl}/products/${id}`);
   }
 
+  getNewArrivals(): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.apiUrl}/products/new`);
+  }
+
   // Admin only
   createProduct(data: Partial<Product>): Observable<Product> {
     return this.http.post<Product>(`${this.apiUrl}/products`, data);

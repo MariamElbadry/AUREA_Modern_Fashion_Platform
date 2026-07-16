@@ -39,20 +39,6 @@
             @if (product.isRent) { <div class="product-badge">Rent</div> }
             @if (product.quantity === 0) { <div class="product-badge sold-out-badge">Sold Out</div> }
             <img [src]="product.imageUrl" [alt]="product.name">
-            <div class="product-overlay">
-              <button class="btn-quick-view" (click)="quickView(product)">Quick View</button>
-              <button
-                class="btn-add-cart"
-                [disabled]="product.quantity === 0"
-                (click)="addToCart(product)">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                  <line x1="3" y1="6" x2="21" y2="6"></line>
-                  <path d="M16 10a4 4 0 0 1-8 0"></path>
-                </svg>
-                {{ product.quantity === 0 ? 'Sold Out' : 'Add to Cart' }}
-              </button>
-            </div>
           </div>
 
           <div class="product-info">
@@ -63,7 +49,7 @@
               <span class="current-price">${{ product.price }}</span>
             </div>
             <div class="product-quantity">
-              <span class="quantity-label">Quantity:</span>
+              <span class="quantity-label">Available:</span>
               <span class="quantity-value" [class.sold-out-text]="product.quantity === 0">
                 @switch (product.quantity) {
                   @case (0) { Sold Out }
@@ -72,6 +58,24 @@
                 }
               </span>
             </div>
+
+            <div class="purchase-row" *ngIf="product.quantity > 0">
+              <div class="quantity-stepper" [attr.aria-label]="'Quantity for ' + product.name">
+                <button type="button" (click)="changeQuantity(product, -1)" [disabled]="quantityFor(product) === 1" [attr.aria-label]="'Decrease ' + product.name + ' quantity'">−</button>
+                <span>{{ quantityFor(product) }}</span>
+                <button type="button" (click)="changeQuantity(product, 1)" [disabled]="quantityFor(product) === product.quantity" [attr.aria-label]="'Increase ' + product.name + ' quantity'">+</button>
+              </div>
+              <button
+                type="button"
+                class="btn-add-cart"
+                [disabled]="addingProductIds.has(product.Id)"
+                (click)="addToCart(product)">
+                {{ addingProductIds.has(product.Id) ? 'Adding…' : 'Add to Cart' }}
+              </button>
+            </div>
+            <p class="cart-feedback" *ngIf="feedback?.productId === product.Id" [class.error]="feedback?.type === 'error'" aria-live="polite">
+              {{ feedback?.message }}
+            </p>
           </div>
         </div>
       } @empty {
@@ -79,9 +83,5 @@
       }
     </div>
 
-    <!-- Load More -->
-    <div class="load-more" *ngIf="!isLoading && filteredProducts.length > 0">
-      <button class="btn-load-more">Load More Products</button>
-    </div>
   </div>
 </section>

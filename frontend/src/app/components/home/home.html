@@ -1,4 +1,3 @@
-<!-- Hero -->
 <section class="hero">
   <div class="hero-veil"></div>
   <div class="hero-inner">
@@ -7,37 +6,51 @@
       <h1>The collection,<br><span class="curated-text">curated.</span></h1>
       <p>Discover timeless pieces from the world's most renowned designers. Curated for the modern woman with appreciation for luxury, craftsmanship, and effortless elegance.</p>
       <div class="cta">
-        <button class="btn btn-solid">Shop Collection</button>
-        <button class="btn btn-ghost">Explore Designers</button>
+        <a class="btn btn-solid" routerLink="/products">Shop Collection</a>
+        <a class="btn btn-ghost" routerLink="/designers">Explore Designers</a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Tease Section -->
-<section class="tease-section">
+<section class="new-section" aria-labelledby="new-arrivals-title">
   <div class="wrap">
     <div class="sec-head">
       <div>
-        <div class="crumb">The house</div>
-        <h2>Four rooms,<br/>one wardrobe.</h2>
+        <div class="crumb">Just arrived</div>
+        <h2 id="new-arrivals-title">New products,<br>freshly curated.</h2>
       </div>
-      <p>Shop occasion wear, rent iconic pieces, style your look on a live model, or discover independent designers — all under one roof.</p>
+      <div class="section-copy">
+        <p>Discover the latest pieces added by our designers, fetched directly from the AUREA collection.</p>
+        <a routerLink="/new" class="view-all">View all new arrivals <span aria-hidden="true">→</span></a>
+      </div>
     </div>
-    
-    <div class="tease">
-      <button class="card">
-        <img src="assets/images/tease-shop.jpg" alt="Shop">
-        <span class="lbl">Shop</span>
-      </button>
-      <button class="card">
-        <img src="assets/images/tease-rent.jpg" alt="Rent">
-        <span class="lbl">Rent</span>
-      </button>
-      <button class="card">
-        <img src="assets/images/tease-studio.jpg" alt="Style Studio">
-        <span class="lbl">Style Studio</span>
-      </button>
+
+    <div class="loading-state" *ngIf="isLoading">
+      <span class="spinner" aria-hidden="true"></span>
+      <span>Loading new products…</span>
+    </div>
+
+    <p class="error-state" *ngIf="errorMessage && !isLoading">{{ errorMessage }}</p>
+
+    <div class="products-grid" *ngIf="!isLoading && !errorMessage">
+      <a class="product-card" routerLink="/products" *ngFor="let product of newProducts">
+        <div class="product-image">
+          <span class="new-chip">New</span>
+          <img [src]="product.imageUrl" [alt]="product.name" loading="lazy">
+        </div>
+        <div class="product-meta">
+          <div>
+            <p class="designer">{{ product.designer }}</p>
+            <h3>{{ product.name }}</h3>
+          </div>
+          <strong>${{ product.price }}</strong>
+        </div>
+      </a>
+    </div>
+
+    <div class="empty-state" *ngIf="!isLoading && !errorMessage && newProducts.length === 0">
+      New products will appear here when an administrator marks them as new arrivals.
     </div>
   </div>
 </section>

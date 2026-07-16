@@ -9,6 +9,8 @@ import { Designers } from './components/designers/designers';
 import { Cart }      from './components/cart/cart';
 import { Orders }    from './components/orders/orders';
 import { Admin }     from './components/admin/admin';
+import { Rent }      from './components/rent/rent';
+import { StyleStudio } from './components/style-studio/style-studio';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 
@@ -18,7 +20,9 @@ export const routes: Routes = [
   { path: 'shop',      component: Shop,      canActivate: [authGuard] },
   { path: 'new',       component: New,       canActivate: [authGuard] },
   { path: 'products',  component: Products,  canActivate: [authGuard] },
+  { path: 'rent',      component: Rent,       canActivate: [authGuard] },
   { path: 'designers', component: Designers, canActivate: [authGuard] },
+  { path: 'studio',    component: StyleStudio, canActivate: [authGuard] },
   { path: 'cart',      component: Cart,      canActivate: [authGuard] },
   { path: 'orders',    component: Orders,    canActivate: [authGuard] },
   { path: 'admin',     component: Admin,     canActivate: [authGuard, adminGuard] },

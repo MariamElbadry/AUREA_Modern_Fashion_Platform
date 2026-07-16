@@ -13,6 +13,15 @@
   --mono: "DM Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
+html {
+  width: 100%;
+  overflow-x: clip;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 /* Global resets and base styles */
 body {
   font-family: var(--sans);
@@ -20,4 +29,15 @@ body {
   color: var(--ink);
   margin: 0;
   padding: 0;
+  width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+img {
+  max-width: 100%;
 }
