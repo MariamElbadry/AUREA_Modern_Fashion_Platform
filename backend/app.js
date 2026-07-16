@@ -4,6 +4,10 @@ const connectDB = require('./config/db');
 
 const app = express();
 
+// Vercel forwards requests through one trusted proxy hop. This makes
+// request.ip represent the client instead of applying auth limits globally.
+app.set('trust proxy', 1);
+
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
     ? (process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : true)

@@ -8,6 +8,9 @@ const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true,
+  // Express uses Vercel's X-Forwarded-For header through `trust proxy`.
+  // The additional RFC Forwarded header is intentionally not used.
+  validate: { forwardedHeader: false },
 });
 
 // Rate limiter for general API endpoints
@@ -17,6 +20,7 @@ const apiLimiter = rateLimit({
   message: { message: 'Too many requests, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { forwardedHeader: false },
 });
 
 module.exports = { authLimiter, apiLimiter };

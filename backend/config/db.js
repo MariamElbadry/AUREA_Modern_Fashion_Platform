@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const dns = require('dns');
+const Cart = require('../models/cart.model');
 let connectionPromise;
 
 // Prefer IPv4 on Windows while preserving the machine's configured DNS resolver.
@@ -17,6 +18,21 @@ const isSrvDnsFailure = (error) =>
 
 const connect = async () => {
   const conn = await mongoose.connect(process.env.MONGODB_URI);
+
+  // Earlier versions used `userId`; the current schema uses `user`. MongoDB
+  // keeps removed indexes until explicitly migrated, and the old unique index
+  // treats every new document as `{ userId: null }`, blocking all but one cart.
+  const cartIndexes = await Cart.collection.indexes();
+  const legacyCartIndex = cartIndexes.find(index =>
+    index.name === 'userId_1' && index.key?.userId === 1
+  );
+
+  if (legacyCartIndex) {
+    await Cart.collection.dropIndex(legacyCartIndex.name);
+    console.log('Removed legacy cart index userId_1');
+  }
+
+  await Cart.createIndexes();
   console.log(`MongoDB Connected: ${conn.connection.host}`);
   return conn;
 };
