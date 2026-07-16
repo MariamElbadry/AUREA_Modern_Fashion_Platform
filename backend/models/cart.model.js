@@ -37,12 +37,11 @@ const cartSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Recalculate totalPrice before every save
-cartSchema.pre('save', function (next) {
+cartSchema.pre('save', function () {
   this.totalPrice = this.items.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  next();
 });
 
 module.exports = mongoose.model('Cart', cartSchema);

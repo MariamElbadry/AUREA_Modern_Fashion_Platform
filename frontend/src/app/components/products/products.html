@@ -36,7 +36,7 @@
       @for (product of filteredProducts; track product.Id) {
         <div class="product-card" [class.sold-out]="product.quantity === 0">
           <div class="product-image">
-            @if (product.isrent) { <div class="product-badge">Rent</div> }
+            @if (product.isRent) { <div class="product-badge">Rent</div> }
             @if (product.quantity === 0) { <div class="product-badge sold-out-badge">Sold Out</div> }
             <img [src]="product.imageUrl" [alt]="product.name">
             <div class="product-overlay">

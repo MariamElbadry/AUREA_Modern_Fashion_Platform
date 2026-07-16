@@ -13,10 +13,18 @@ export class CartService {
   }
 
   refreshCount(): void {
-    this.getCart().subscribe({ next: (cart: any) => {
-      const count = cart.items?.reduce((s: number, i: any) => s + i.quantity, 0) || 0;
-      this.cartCountSubject.next(count);
-    }, error: () => {} });
+    this.getCart().subscribe({ 
+      next: (cart: any) => {
+        const count = cart.items?.reduce((s: number, i: any) => s + i.quantity, 0) || 0;
+        this.cartCountSubject.next(count);
+      }, 
+      error: (err) => {
+        console.error('Failed to refresh cart count:', err);
+        if (err.status === 401) {
+          this.cartCountSubject.next(0);
+        }
+      } 
+    });
   }
 
   getCart(): Observable<any> {
@@ -32,8 +40,8 @@ export class CartService {
     );
   }
 
-  updateQuantity(productId: number, quantity: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/update`, { productId, quantity }).pipe(
+  updateQuantity(productId: number, quantity: number, isRent: boolean = false): Observable<any> {
+    return this.http.put(`${this.apiUrl}/update`, { productId, quantity, isRent }).pipe(
       tap((cart: any) => {
         const count = cart.items?.reduce((s: number, i: any) => s + i.quantity, 0) || 0;
         this.cartCountSubject.next(count);
@@ -41,8 +49,8 @@ export class CartService {
     );
   }
 
-  removeItem(productId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/remove/${productId}`).pipe(
+  removeItem(productId: number, isRent: boolean = false): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/remove/${productId}/${isRent}`).pipe(
       tap((cart: any) => {
         const count = cart.items?.reduce((s: number, i: any) => s + i.quantity, 0) || 0;
         this.cartCountSubject.next(count);

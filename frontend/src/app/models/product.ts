@@ -6,6 +6,6 @@ export interface Product {
     imageUrl: string;
     quantity: number;
     designer: string;
-    isrent: boolean;
+    isRent: boolean;
     isNew: boolean;
 }

@@ -1,4 +1,5 @@
 const Category = require('../models/category.model');
+const { filterFields, allowedCategoryFields } = require('../utils/validators');
 
 // Get all categories
 const getCategories = async (req, res) => {
@@ -26,7 +27,8 @@ const getCategoryById = async (req, res) => {
 // Create category (admin only)
 const createCategory = async (req, res) => {
   try {
-    const category = new Category(req.body);
+    const filteredBody = filterFields(req.body, allowedCategoryFields);
+    const category = new Category(filteredBody);
     const savedCategory = await category.save();
     res.status(201).json(savedCategory);
   } catch (error) {
@@ -37,10 +39,11 @@ const createCategory = async (req, res) => {
 // Update category (admin only)
 const updateCategory = async (req, res) => {
   try {
+    const filteredBody = filterFields(req.body, allowedCategoryFields);
     const category = await Category.findOneAndUpdate(
       { id: req.params.id },
-      req.body,
-      { new: true }
+      filteredBody,
+      { new: true, runValidators: true }
     );
     if (!category) {
       return res.status(404).json({ message: 'Category not found' });

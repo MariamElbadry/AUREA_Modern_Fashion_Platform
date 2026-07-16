@@ -44,20 +44,20 @@ export class Cart implements OnInit {
   }
 
   increase(item: any): void {
-    this.cartService.updateQuantity(item.productId, item.quantity + 1).subscribe({
+    this.cartService.updateQuantity(item.productId, item.quantity + 1, item.isRent).subscribe({
       next: (cart) => { this.cart = cart; this.cdr.detectChanges(); }
     });
   }
 
   decrease(item: any): void {
     if (item.quantity <= 1) { this.remove(item); return; }
-    this.cartService.updateQuantity(item.productId, item.quantity - 1).subscribe({
+    this.cartService.updateQuantity(item.productId, item.quantity - 1, item.isRent).subscribe({
       next: (cart) => { this.cart = cart; this.cdr.detectChanges(); }
     });
   }
 
   remove(item: any): void {
-    this.cartService.removeItem(item.productId).subscribe({
+    this.cartService.removeItem(item.productId, item.isRent).subscribe({
       next: (cart) => { this.cart = cart; this.cdr.detectChanges(); }
     });
   }

@@ -7,7 +7,24 @@ async function getPopulatedCart(userId) {
     select: 'name price imageUrl designer catId isRent isNew quantity Id'
   });
   if (!cart) return { items: [], totalPrice: 0 };
-  return cart;
+  
+  // Flatten product data for frontend compatibility
+  const flattenedCart = {
+    _id: cart._id,
+    user: cart.user,
+    items: cart.items.map(item => ({
+      productId: item.product?.Id,
+      name: item.product?.name,
+      imageUrl: item.product?.imageUrl,
+      designer: item.product?.designer,
+      isRent: item.isRent,
+      quantity: item.quantity,
+      price: item.price,
+      product: item.product // Keep original for reference
+    })),
+    totalPrice: cart.totalPrice
+  };
+  return flattenedCart;
 }
 
 // GET /api/cart

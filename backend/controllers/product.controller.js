@@ -1,4 +1,5 @@
 const Product = require('../models/product.model');
+const { filterFields, allowedProductFields } = require('../utils/validators');
 
 // Get all products
 const getProducts = async (req, res) => {
@@ -46,7 +47,8 @@ const getNewArrivals = async (req, res) => {
 // Create product (admin only)
 const createProduct = async (req, res) => {
   try {
-    const product = new Product(req.body);
+    const filteredBody = filterFields(req.body, allowedProductFields);
+    const product = new Product(filteredBody);
     const savedProduct = await product.save();
     res.status(201).json(savedProduct);
   } catch (error) {
@@ -57,10 +59,11 @@ const createProduct = async (req, res) => {
 // Update product (admin only)
 const updateProduct = async (req, res) => {
   try {
+    const filteredBody = filterFields(req.body, allowedProductFields);
     const product = await Product.findOneAndUpdate(
       { Id: req.params.id },
-      req.body,
-      { new: true }
+      filteredBody,
+      { new: true, runValidators: true }
     );
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });

@@ -1,11 +1,12 @@
 const Order = require('../models/order.model');
 const Cart = require('../models/cart.model');
 const Product = require('../models/product.model');
+const { isValidStatusTransition } = require('../utils/orderStateMachine');
 
 // Get all orders for a user
 const getUserOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ userId: req.user.userId }).populate('products.productId');
+    const orders = await Order.find({ user: req.user.id });
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -15,7 +16,7 @@ const getUserOrders = async (req, res) => {
 // Get single order by ID
 const getOrderById = async (req, res) => {
   try {
-    const order = await Order.findOne({ _id: req.params.id, userId: req.user.userId }).populate('products.productId');
+    const order = await Order.findOne({ _id: req.params.id, user: req.user.id });
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
@@ -27,12 +28,17 @@ const getOrderById = async (req, res) => {
 
 // Create order from cart
 const createOrder = async (req, res) => {
+  const session = await Order.startSession();
+  session.startTransaction();
+  
   try {
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     // Get user's cart
-    const cart = await Cart.findOne({ userId }).populate('items.productId');
+    const cart = await Cart.findOne({ user: userId }).populate('items.product').session(session);
     if (!cart || cart.items.length === 0) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ message: 'Cart is empty' });
     }
 
@@ -43,36 +49,48 @@ const createOrder = async (req, res) => {
 
     // Create order
     const order = new Order({
-      userId,
-      products: cart.items.map(item => ({
-        productId: item.productId._id,
-        quantity: item.quantity,
+      user: userId,
+      items: cart.items.map(item => ({
+        productId: item.product._id,
+        name: item.product.name,
         price: item.price,
-        isrent: item.isrent
+        imageUrl: item.product.imageUrl,
+        quantity: item.quantity,
+        designer: item.product.designer,
+        isRent: item.isRent
       })),
       totalAmount,
       status: 'pending'
     });
 
-    const savedOrder = await order.save();
+    const savedOrder = await order.save({ session });
 
     // Clear cart after order is created
     cart.items = [];
     cart.totalPrice = 0;
-    await cart.save();
+    await cart.save({ session });
 
     // Update product quantities
-    for (const item of savedOrder.products) {
-      if (!item.isrent) {
-        await Product.findByIdAndUpdate(item.productId, {
-          $inc: { quantity: -item.quantity }
-        });
+    for (const item of savedOrder.items) {
+      if (!item.isRent) {
+        const product = await Product.findById(item.productId).session(session);
+        if (product.quantity < item.quantity) {
+          await session.abortTransaction();
+          session.endSession();
+          return res.status(400).json({ message: 'Insufficient stock for product' });
+        }
+        product.quantity -= item.quantity;
+        await product.save({ session });
       }
     }
 
-    await savedOrder.populate('products.productId');
+    await session.commitTransaction();
+    session.endSession();
+
     res.status(201).json(savedOrder);
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     res.status(500).json({ message: error.message });
   }
 };
@@ -87,15 +105,32 @@ const updateOrderStatus = async (req, res) => {
       return res.status(400).json({ message: 'Invalid status' });
     }
 
-    const order = await Order.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    ).populate('products.productId');
-
+    const order = await Order.findById(req.params.id);
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
+
+    // Validate status transition using state machine
+    if (!isValidStatusTransition(order.status, status)) {
+      return res.status(400).json({ 
+        message: `Invalid status transition from '${order.status}' to '${status}'`,
+        allowedTransitions: ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled']
+      });
+    }
+
+    // Restore stock if cancelling a non-rental order
+    if (status === 'cancelled' && order.status !== 'cancelled') {
+      for (const item of order.items) {
+        if (!item.isRent) {
+          await Product.findByIdAndUpdate(item.productId, {
+            $inc: { quantity: item.quantity }
+          });
+        }
+      }
+    }
+
+    order.status = status;
+    await order.save();
 
     res.json(order);
   } catch (error) {
@@ -108,7 +143,7 @@ const cancelOrder = async (req, res) => {
   try {
     const order = await Order.findOne({
       _id: req.params.id,
-      userId: req.user.userId,
+      user: req.user.id,
       status: 'pending'
     });
 
@@ -120,15 +155,14 @@ const cancelOrder = async (req, res) => {
     await order.save();
 
     // Restore product quantities if not rental
-    for (const item of order.products) {
-      if (!item.isrent) {
+    for (const item of order.items) {
+      if (!item.isRent) {
         await Product.findByIdAndUpdate(item.productId, {
           $inc: { quantity: item.quantity }
         });
       }
     }
 
-    await order.populate('products.productId');
     res.json(order);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -138,7 +172,7 @@ const cancelOrder = async (req, res) => {
 // Get all orders (admin only)
 const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find().populate('products.productId').populate('userId');
+    const orders = await Order.find().populate('user', 'firstName lastName email role');
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: error.message });

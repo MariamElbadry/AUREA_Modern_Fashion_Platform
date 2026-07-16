@@ -116,10 +116,10 @@ loadProducts(): void {
     imageUrl:  product.imageUrl,
     quantity:  1,
     designer:  product.designer,
-    isrent:    product.isrent
+    isRent:    product.isRent
   }).subscribe({
     next: () => alert(`"${product.name}" added to cart!`),
-    error: () => alert('Failed to add to cart')
+    error: (err) => alert(err.error?.message || 'Failed to add to cart')
   });
 }
 }

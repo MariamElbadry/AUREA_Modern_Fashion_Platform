@@ -1,0 +1,290 @@
+<div class="admin-shell">
+
+  <!-- ═══════════════════════════════ SIDEBAR ═══════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-name">AUREA</span>
+      <span class="brand-badge">ADMIN</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item" [class.active]="activeTab === 'dashboard'" (click)="activeTab = 'dashboard'">
+        <span class="nav-icon">⬡</span>
+        <span>Dashboard</span>
+      </button>
+      <button class="nav-item" [class.active]="activeTab === 'products'" (click)="activeTab = 'products'">
+        <span class="nav-icon">◈</span>
+        <span>Products</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-avatar">{{ currentUser?.firstName?.charAt(0) }}{{ currentUser?.lastName?.charAt(0) }}</div>
+      <div class="user-info">
+        <div class="user-name">{{ currentUser?.firstName }} {{ currentUser?.lastName }}</div>
+        <div class="user-role">Administrator</div>
+      </div>
+      <button class="icon-btn" title="Logout" (click)="logout()">⏻</button>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════ MAIN ═══════════════════════════════════ -->
+  <main class="main-area">
+
+    <!-- ────── DASHBOARD TAB ────── -->
+    <div *ngIf="activeTab === 'dashboard'" class="tab-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Welcome back, {{ currentUser?.firstName }}</h1>
+          <p class="page-sub">Here's what's happening with your store today.</p>
+        </div>
+        <button class="btn-outline" (click)="goHome()">← Back to Store</button>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card accent">
+          <div class="stat-icon">◈</div>
+          <div class="stat-val">{{ totalProducts }}</div>
+          <div class="stat-label">Total Products</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⊟</div>
+          <div class="stat-val">{{ totalStock }}</div>
+          <div class="stat-label">Units in Stock</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">◉</div>
+          <div class="stat-val">{{ rentableCount }}</div>
+          <div class="stat-label">Rentable Items</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✦</div>
+          <div class="stat-val">{{ newArrivalsCount }}</div>
+          <div class="stat-label">New Arrivals</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions-section">
+        <h2 class="section-title">Quick Actions</h2>
+        <div class="quick-grid">
+          <div class="quick-card" (click)="activeTab = 'products'; openAddModal()">
+            <div class="quick-icon add-icon">+</div>
+            <div class="quick-text">
+              <div class="quick-heading">Add Product</div>
+              <div class="quick-desc">Add a new item to the catalog</div>
+            </div>
+          </div>
+          <div class="quick-card" (click)="activeTab = 'products'">
+            <div class="quick-icon edit-icon">✎</div>
+            <div class="quick-text">
+              <div class="quick-heading">Manage Products</div>
+              <div class="quick-desc">Edit, delete or update inventory</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Products -->
+      <div class="recent-section">
+        <h2 class="section-title">Recent Products</h2>
+        <div class="recent-list" *ngIf="!isLoading">
+          <div class="recent-item" *ngFor="let p of products.slice(0, 5)">
+            <img [src]="p.imageUrl" [alt]="p.name" class="recent-img" onerror="this.src='https://placehold.co/48x48/f5f0eb/8b6a4e?text=?'">
+            <div class="recent-info">
+              <div class="recent-name">{{ p.name }}</div>
+              <div class="recent-meta">{{ getCategoryName(p.catId) }} · by {{ p.designer }}</div>
+            </div>
+            <div class="recent-price">${{ p.price }}</div>
+            <div class="recent-stock" [class.low]="p.quantity < 5">{{ p.quantity }} in stock</div>
+          </div>
+          <div class="recent-item empty" *ngIf="products.length === 0">No products yet.</div>
+        </div>
+        <div class="loading-state" *ngIf="isLoading">Loading...</div>
+      </div>
+    </div>
+
+    <!-- ────── PRODUCTS TAB ────── -->
+    <div *ngIf="activeTab === 'products'" class="tab-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Products</h1>
+          <p class="page-sub">{{ totalProducts }} items in catalog</p>
+        </div>
+        <button class="btn-primary" id="add-product-btn" (click)="openAddModal()">+ Add Product</button>
+      </div>
+
+      <!-- Search -->
+      <div class="toolbar">
+        <div class="search-wrap">
+          <span class="search-icon">⌕</span>
+          <input
+            id="product-search"
+            class="search-input"
+            type="text"
+            placeholder="Search products, designers, categories…"
+            [(ngModel)]="searchTerm"
+          />
+        </div>
+        <div class="result-count">{{ filteredProducts.length }} results</div>
+      </div>
+
+      <!-- Loading -->
+      <div class="loading-state" *ngIf="isLoading">
+        <div class="spinner"></div>
+        Loading products…
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap" *ngIf="!isLoading">
+        <table class="products-table" *ngIf="filteredProducts.length > 0">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Flags</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of filteredProducts" class="table-row">
+              <td class="product-cell">
+                <img [src]="p.imageUrl" [alt]="p.name" class="table-img" onerror="this.src='https://placehold.co/48x48/f5f0eb/8b6a4e?text=?'">
+                <div class="product-info">
+                  <div class="product-name">{{ p.name }}</div>
+                  <div class="product-designer">by {{ p.designer }}</div>
+                </div>
+              </td>
+              <td><span class="cat-badge">{{ getCategoryName(p.catId) }}</span></td>
+              <td class="price-cell">${{ p.price }}</td>
+              <td>
+                <span class="stock-badge" [class.out]="p.quantity === 0" [class.low]="p.quantity > 0 && p.quantity < 5">
+                  {{ p.quantity === 0 ? 'Out of Stock' : p.quantity + ' units' }}
+                </span>
+              </td>
+              <td class="flags-cell">
+                <span class="flag rent" *ngIf="p.isRent">Rent</span>
+                <span class="flag new" *ngIf="p.isNew">New</span>
+              </td>
+              <td class="actions-cell">
+                <button class="action-btn edit-btn" [id]="'edit-btn-' + p.Id" (click)="openEditModal(p)" title="Edit">✎</button>
+                <button class="action-btn delete-btn" [id]="'delete-btn-' + p.Id" (click)="confirmDelete(p.Id)" title="Delete">✕</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="empty-state" *ngIf="filteredProducts.length === 0">
+          <div class="empty-icon">◈</div>
+          <div class="empty-title">No products found</div>
+          <div class="empty-desc">{{ searchTerm ? 'Try a different search term.' : 'Start by adding your first product.' }}</div>
+          <button class="btn-primary" (click)="openAddModal()" *ngIf="!searchTerm">+ Add Product</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══════════════════════════════ ADD / EDIT MODAL ════════════════════════ -->
+<div class="modal-backdrop" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-panel" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">{{ isEditing ? 'Edit Product' : 'Add New Product' }}</h2>
+      <button class="modal-close" (click)="closeModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-grid">
+        <!-- Name -->
+        <div class="form-group full">
+          <label class="form-label">Product Name <span class="req">*</span></label>
+          <input id="form-name" class="form-input" type="text" [(ngModel)]="form['name']" placeholder="e.g. Embroidered Silk Gown" />
+        </div>
+
+        <!-- Designer -->
+        <div class="form-group">
+          <label class="form-label">Designer <span class="req">*</span></label>
+          <input id="form-designer" class="form-input" type="text" [(ngModel)]="form['designer']" placeholder="e.g. Maria Chen" />
+        </div>
+
+        <!-- Category -->
+        <div class="form-group">
+          <label class="form-label">Category <span class="req">*</span></label>
+          <select id="form-category" class="form-input" [(ngModel)]="form['catId']">
+            <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+          </select>
+        </div>
+
+        <!-- Price -->
+        <div class="form-group">
+          <label class="form-label">Price (USD) <span class="req">*</span></label>
+          <input id="form-price" class="form-input" type="number" [(ngModel)]="form['price']" min="0" placeholder="0" />
+        </div>
+
+        <!-- Quantity -->
+        <div class="form-group">
+          <label class="form-label">Stock Quantity <span class="req">*</span></label>
+          <input id="form-quantity" class="form-input" type="number" [(ngModel)]="form['quantity']" min="0" placeholder="0" />
+        </div>
+
+        <!-- Image URL -->
+        <div class="form-group full">
+          <label class="form-label">Image URL <span class="req">*</span></label>
+          <input id="form-imageUrl" class="form-input" type="text" [(ngModel)]="form['imageUrl']" placeholder="https://example.com/image.jpg" />
+        </div>
+
+        <!-- Preview -->
+        <div class="form-group full" *ngIf="form['imageUrl']">
+          <label class="form-label">Image Preview</label>
+          <img [src]="form['imageUrl']" alt="Preview" class="img-preview" onerror="this.style.display='none'" />
+        </div>
+
+        <!-- Flags -->
+        <div class="form-group">
+          <label class="form-label">Options</label>
+          <div class="toggle-row">
+            <label class="toggle-label">
+              <input type="checkbox" [(ngModel)]="form['isRent']" id="form-isRent" /> Available for Rent
+            </label>
+            <label class="toggle-label">
+              <input type="checkbox" [(ngModel)]="form['isNew']" id="form-isNew" /> Mark as New Arrival
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-outline" (click)="closeModal()" [disabled]="isSaving">Cancel</button>
+      <button class="btn-primary" id="submit-product-btn" (click)="submitForm()" [disabled]="isSaving">
+        <span *ngIf="!isSaving">{{ isEditing ? 'Save Changes' : 'Add Product' }}</span>
+        <span *ngIf="isSaving" class="saving-dots">Saving…</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ DELETE CONFIRM ══════════════════════════ -->
+<div class="modal-backdrop" *ngIf="deleteConfirmId !== null" (click)="cancelDelete()">
+  <div class="confirm-panel" (click)="$event.stopPropagation()">
+    <div class="confirm-icon">!</div>
+    <h3 class="confirm-title">Delete Product?</h3>
+    <p class="confirm-desc">This action cannot be undone. The product will be permanently removed from the catalog.</p>
+    <div class="confirm-actions">
+      <button class="btn-outline" (click)="cancelDelete()" [disabled]="isDeleting">Cancel</button>
+      <button class="btn-danger" id="confirm-delete-btn" (click)="executeDelete()" [disabled]="isDeleting">
+        {{ isDeleting ? 'Deleting…' : 'Yes, Delete' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ TOAST ═══════════════════════════════════ -->
+<div class="toast" *ngIf="toast" [class.toast-success]="toast.type === 'success'" [class.toast-error]="toast.type === 'error'">
+  <span class="toast-icon">{{ toast.type === 'success' ? '✓' : '✕' }}</span>
+  {{ toast.message }}
+</div>

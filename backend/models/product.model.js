@@ -12,7 +12,8 @@ const productSchema = new mongoose.Schema({
   },
   price: {
     type: Number,
-    required: true
+    required: true,
+    min: 0
   },
   catId: {
     type: Number,
@@ -25,7 +26,8 @@ const productSchema = new mongoose.Schema({
   quantity: {
     type: Number,
     required: true,
-    default: 0
+    default: 0,
+    min: 0
   },
   designer: {
     type: String,

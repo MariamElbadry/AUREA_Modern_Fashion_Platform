@@ -8,7 +8,9 @@ import { Products }  from './components/products/products';
 import { Designers } from './components/designers/designers';
 import { Cart }      from './components/cart/cart';
 import { Orders }    from './components/orders/orders';
+import { Admin }     from './components/admin/admin';
 import { authGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   { path: '',          redirectTo: '/home', pathMatch: 'full' },
@@ -19,6 +21,7 @@ export const routes: Routes = [
   { path: 'designers', component: Designers, canActivate: [authGuard] },
   { path: 'cart',      component: Cart,      canActivate: [authGuard] },
   { path: 'orders',    component: Orders,    canActivate: [authGuard] },
+  { path: 'admin',     component: Admin,     canActivate: [authGuard, adminGuard] },
   { path: 'auth',      component: Auth },
   { path: 'register',  component: Register },
   { path: '**',        redirectTo: '/home' }

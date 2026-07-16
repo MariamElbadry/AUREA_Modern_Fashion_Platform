@@ -79,6 +79,7 @@ export class Navbar implements OnInit, OnDestroy {
   goToOrders(): void { this.accountMenuOpen = false; this.router.navigate(['orders']); }
   signOut(): void {
     this.authService.logout();
+    this.cartService.refreshCount();
     this.accountMenuOpen = false;
     this.router.navigate(['auth']);
   }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { CartService } from '../../services/cart.service';
 
 @Component({
   selector: 'app-auth',
@@ -17,7 +18,7 @@ export class Auth {
   errorMessage = '';
   isLoading = false;
 
-  constructor(private authService: AuthService, private router: Router) {
+  constructor(private authService: AuthService, private router: Router, private cartService: CartService) {
     console.log('Auth component initialized');
   }
 
@@ -48,10 +49,14 @@ export class Auth {
         this.isLoading = false;
         this.email = '';
         this.password = '';
-        this.router.navigate(['/home']).then(() => {
-          console.log('Navigation to home successful');
+        this.cartService.refreshCount();
+        
+        // Redirect to admin page if user has admin role
+        const redirectPath = response.user?.role === 'admin' ? '/admin' : '/home';
+        this.router.navigate([redirectPath]).then(() => {
+          console.log('Navigation successful');
         }).catch(err => {
-          console.error('Navigation to home failed:', err);
+          console.error('Navigation failed:', err);
         });
       },
       error: (error) => {

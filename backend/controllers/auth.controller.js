@@ -7,14 +7,26 @@ const register = async (req, res) => {
   try {
     const { firstName, lastName, email, password, role } = req.body;
 
-    // Validate role - only allow 'customer' or 'designer'
-    const validRoles = ['customer', 'designer'];
-    if (role && !validRoles.includes(role)) {
-      return res.status(400).json({ message: 'Invalid role. Only customer and designer can register.' });
+    // Validate email format and normalize to lowercase
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Invalid email format' });
+    }
+    const normalizedEmail = email.toLowerCase();
+
+    // Validate password strength
+    if (!password || password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+    }
+
+    // Public registration only allows customer role
+    // Designer role requires admin approval
+    if (role && role !== 'customer') {
+      return res.status(400).json({ message: 'Public registration only allows customer role. Designer role requires admin approval.' });
     }
 
     // Check if user exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
@@ -22,13 +34,13 @@ const register = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    // Create user
+    // Create user (always customer for public registration)
     const user = new User({
       firstName,
       lastName,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
-      role: role || 'customer'
+      role: 'customer'
     });
 
     await user.save();
@@ -43,8 +55,11 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Normalize email to lowercase
+    const normalizedEmail = email.toLowerCase();
+
     // Find user
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail }).select('+password');
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
