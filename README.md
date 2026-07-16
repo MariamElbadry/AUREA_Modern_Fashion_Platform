@@ -3,19 +3,13 @@
 ## Run the complete website on one URL
 
 1. Create `backend/.env` with `MONGODB_URI`, `JWT_SECRET`, and optionally `PORT`.
-2. Install both applications once:
-
-   ```bash
-   npm run install:all
-   ```
-
-3. Build and launch the complete application (the script automatically uses a compatible Node.js 24 runtime for Angular):
+2. Build and launch the complete application:
 
    ```bash
    npm run launch
    ```
 
-Open `http://localhost:5000`. The Node server serves both the Angular website and the `/api` backend from that single origin.
+The launch command automatically installs missing frontend and backend dependencies, then uses a compatible Node.js 24 runtime to build Angular. Open `http://localhost:5000`. The Node server serves both the Angular website and the `/api` backend from that single origin.
 
 For hosting platforms, use `npm run build` as the build command and `npm start` as the start command. Set `MONGODB_URI`, `JWT_SECRET`, `NODE_ENV=production`, and the platform-provided `PORT`. `FRONTEND_URL` is optional when the frontend is served by this backend; use a comma-separated list only if an external frontend also calls the API.
 
