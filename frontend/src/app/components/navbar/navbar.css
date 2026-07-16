@@ -1,0 +1,396 @@
+/* Navigation container */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(248, 243, 236, 0.95);
+  border-bottom: 1px solid var(--line);
+  min-height: 80px;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Scrolled state (remains transparent as requested) */
+.nav.scrolled {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: 1px solid transparent;
+  box-shadow: none;
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px 40px;
+  font-family: var(--mono);
+  font-size: 16px;
+  letter-spacing: .16em;
+  width: 100%;
+  margin: 0 auto;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Flatten groups so all items share one even row */
+.nav-left,
+.nav-right {
+  display: contents;
+}
+
+/* Scrolled state padding compacting */
+.nav.scrolled .nav-inner {
+  padding: 20px 40px;
+}
+
+/* Nav links styling */
+.nav a.link,
+.nav button.link {
+  margin: 0;
+  flex-shrink: 0;
+  white-space: nowrap;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: .75;
+  position: relative;
+  padding: 8px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Link hover line effect */
+.nav a.link::before,
+.nav button.link::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 1.5px;
+  background: var(--accent);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateX(-50%);
+}
+
+.nav a.link:hover,
+.nav button.link:hover {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.nav a.link:hover::before,
+.nav button.link:hover::before {
+  width: 100%;
+}
+
+.nav .link.active {
+  color: var(--accent);
+  opacity: 1;
+  font-weight: 600;
+}
+
+.nav .link.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1.5px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+/* Brand styling */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.brand-text {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 28px;
+  color: #8B6A4E;
+  letter-spacing: 0.05em;
+  font-weight: 400;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brand:hover .brand-text {
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+
+@media (max-width: 820px) {
+  .brand-text {
+    font-size: 24px;
+  }
+}
+
+/* Sign In Navigation Button */
+.nav .signin-btn-nav {
+  border: 1px solid var(--accent);
+  border-radius: 20px;
+  padding: 6px 20px !important;
+  color: var(--accent) !important;
+  opacity: 1 !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.nav .signin-btn-nav::before {
+  display: none; /* Disable underline effect */
+}
+
+.nav .signin-btn-nav:hover {
+  background: var(--accent) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(200, 90, 43, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Account dropdown styling */
+.acct-menu {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.acct-btn {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink);
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--bg-2);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.acct-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: white;
+}
+
+.acct-btn .dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.acct-drop {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 12px);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(230, 217, 200, 0.5);
+  border-radius: 16px;
+  min-width: 240px;
+  padding: 12px;
+  box-shadow: 0 20px 40px rgba(63, 49, 40, 0.08);
+  display: block;
+  opacity: 0;
+  transform: translateY(10px) scale(0.95);
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 60;
+}
+
+.acct-drop.on {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.acct-drop .who {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 8px;
+}
+
+.acct-drop .who strong {
+  display: block;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 18px;
+  color: var(--ink);
+}
+
+.acct-drop .who span {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-top: 2px;
+  display: block;
+}
+
+.acct-drop button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  border-radius: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.acct-drop button:hover {
+  background: var(--bg);
+  color: var(--accent);
+}
+
+.designer-only {
+  display: none;
+}
+
+body.is-designer .designer-only {
+  display: block;
+}
+
+/* Mobile responsive menu */
+@media (max-width: 820px) {
+  .nav-inner {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    position: relative;
+    padding: 16px 20px;
+  }
+
+  .nav-left,
+  .nav-right {
+    display: none;
+  }
+  
+  .nav.scrolled .nav-inner {
+    padding: 12px 20px;
+  }
+
+  .brand {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .menu-btn {
+    display: inline-flex;
+  }
+}
+
+.menu-btn {
+  display: none;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.mobile-menu {
+  display: none;
+  padding: 16px 32px 24px;
+  border-top: 1px solid var(--line);
+  background: rgba(255, 253, 249, 0.95);
+  backdrop-filter: blur(20px);
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mobile-menu.on {
+  display: flex;
+}
+
+.mobile-menu button {
+  text-align: left;
+  font-family: var(--mono);
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: .14em;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  padding: 6px 0;
+  color: var(--ink);
+  opacity: .8;
+  transition: all 0.2s ease;
+}
+
+.mobile-menu button:hover,
+.mobile-menu button.active {
+  color: var(--accent);
+  opacity: 1;
+}
+
+/* Cart button */
+.cart-btn {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+}
+.cart-btn:hover { color: #b5a98a; }
+
+.cart-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #c85a2b;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Badge in dropdown */
+.badge {
+  display: inline-block;
+  background: #c85a2b;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  margin-left: 6px;
+}

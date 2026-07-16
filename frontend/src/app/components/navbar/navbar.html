@@ -1,0 +1,63 @@
+<nav class="nav" [class.scrolled]="isScrolled">
+  <div class="nav-inner">
+    <div class="nav-left">
+      <button class="link nav-link" [class.active]="activePage === 'home'" (click)="navigate('home')">Home</button>
+      <button class="link nav-link" [class.active]="activePage === 'shop'" (click)="navigate('shop')">Shop</button>
+      <button class="link nav-link" [class.active]="activePage === 'rent'" (click)="navigate('rent')">Rent</button>
+    </div>
+
+    <button class="brand" (click)="navigate('home')" aria-label="AUREA home">
+      <span class="brand-text">AUREA</span>
+    </button>
+
+    <div class="nav-right">
+      <button class="link nav-link" [class.active]="activePage === 'designers'" (click)="navigate('designers')">Designers</button>
+      <button class="link nav-link" [class.active]="activePage === 'studio'" (click)="navigate('studio')">Style Studio</button>
+
+      <!-- Cart icon -->
+      <button class="cart-btn" *ngIf="isLoggedIn" (click)="goToCart()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        <span class="cart-count" *ngIf="cartCount > 0">{{ cartCount }}</span>
+      </button>
+
+      <button class="link signin-btn-nav" *ngIf="!isLoggedIn" (click)="openAuth()">Sign in</button>
+
+      <div class="acct-menu" *ngIf="isLoggedIn">
+        <button class="acct-btn" (click)="toggleAccountMenu()">
+          <span class="dot"></span>
+          <span>{{ accountName }}</span>
+        </button>
+        <div class="acct-drop" [class.on]="accountMenuOpen">
+          <div class="who">
+            <strong>{{ fullName }}</strong>
+            <span>{{ role }}</span>
+          </div>
+          <button class="designer-only" *ngIf="isDesigner">Upload collection</button>
+          <button (click)="goToCart()">My Cart <span class="badge" *ngIf="cartCount > 0">{{ cartCount }}</span></button>
+          <button (click)="goToOrders()">My Orders</button>
+          <button (click)="signOut()">Sign out</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="menu-btn" (click)="toggleMobileMenu()">Menu</button>
+  </div>
+
+  <div class="mobile-menu" [class.on]="mobileMenuOpen">
+    <button class="link nav-link" (click)="navigate('home')">Home</button>
+    <button class="link nav-link" (click)="navigate('shop')">Shop</button>
+    <button class="link nav-link" (click)="navigate('designers')">Designers</button>
+    <button class="link nav-link" (click)="navigate('cart')" *ngIf="isLoggedIn">Cart ({{ cartCount }})</button>
+    <button class="link nav-link" (click)="navigate('orders')" *ngIf="isLoggedIn">My Orders</button>
+    <button class="link signin-btn-nav" *ngIf="!isLoggedIn" (click)="openAuth()">Sign in</button>
+    <div *ngIf="isLoggedIn" class="mobile-user">
+      <span class="mobile-username">{{ fullName }}</span>
+      <span class="mobile-role">{{ role }}</span>
+      <button class="link nav-link" (click)="signOut()">Sign out</button>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,55 @@
+<div class="container">
+    <div class="card">
+        <div class="left"></div>
+        <div class="right">
+            <div class="content">
+                <div class="logo">AUREA</div>
+                <div class="tagline">
+                    OCCASION WEAR • REIMAGINED
+                </div>
+
+                <h1>Welcome Back</h1>
+
+                <p class="description">
+                    Sign in to continue discovering timeless fashion and exclusive designer collections.
+                </p>
+
+                <form (ngSubmit)="onSubmit()">
+                    <div class="group">
+                        <label>Email Address</label>
+                        <div class="input-box">
+                            <i class="fa-regular fa-envelope"></i>
+                            <input type="email" [(ngModel)]="email" name="email" placeholder="Enter your email" required>
+                        </div>
+                    </div>
+
+                    <div class="group">
+                        <label>Password</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" [(ngModel)]="password" name="password" placeholder="Enter your password" required>
+                            <i class="fa-regular fa-eye eye"></i>
+                        </div>
+                    </div>
+
+                    <div class="forgot">
+                        <a href="#">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit" class="signin-btn" [disabled]="isLoading">
+                        {{ isLoading ? 'SIGNING IN...' : 'SIGN IN' }}
+                    </button>
+                </form>
+
+                <div class="error-message" *ngIf="errorMessage">
+                    {{ errorMessage }}
+                </div>
+
+                <div class="signup">
+                    Don't have an account?
+                    <a routerLink="/register">Create one</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

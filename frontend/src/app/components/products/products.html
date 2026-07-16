@@ -1,0 +1,87 @@
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="crumb">Shop / Products</div>
+        <h2>The collection,<br/>curated.</h2>
+      </div>
+      <p>Discover our carefully selected pieces from renowned designers. Each item tells a story of craftsmanship and timeless elegance.</p>
+    </div>
+
+    <!-- Sort Only -->
+    <div class="filter-bar">
+      <div class="filter-sort">
+        <select class="sort-select" (change)="sortProducts($event)">
+          <option value="featured">Featured</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="newest">Newest</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Loading products...</p>
+    </div>
+
+    <!-- Error -->
+    <div class="error" *ngIf="errorMessage && !isLoading">
+      <p>{{ errorMessage }}</p>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="products-grid" *ngIf="!isLoading && !errorMessage">
+      @for (product of filteredProducts; track product.Id) {
+        <div class="product-card" [class.sold-out]="product.quantity === 0">
+          <div class="product-image">
+            @if (product.isrent) { <div class="product-badge">Rent</div> }
+            @if (product.quantity === 0) { <div class="product-badge sold-out-badge">Sold Out</div> }
+            <img [src]="product.imageUrl" [alt]="product.name">
+            <div class="product-overlay">
+              <button class="btn-quick-view" (click)="quickView(product)">Quick View</button>
+              <button
+                class="btn-add-cart"
+                [disabled]="product.quantity === 0"
+                (click)="addToCart(product)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+                {{ product.quantity === 0 ? 'Sold Out' : 'Add to Cart' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="product-info">
+            <div class="product-category">{{ getCategoryName(product.catId) }}</div>
+            <h3 class="product-name">{{ product.name }}</h3>
+            <div class="product-designer">by {{ product.designer }}</div>
+            <div class="product-price">
+              <span class="current-price">${{ product.price }}</span>
+            </div>
+            <div class="product-quantity">
+              <span class="quantity-label">Quantity:</span>
+              <span class="quantity-value" [class.sold-out-text]="product.quantity === 0">
+                @switch (product.quantity) {
+                  @case (0) { Sold Out }
+                  @case (1) { Last Item }
+                  @default { {{ product.quantity }} }
+                }
+              </span>
+            </div>
+          </div>
+        </div>
+      } @empty {
+        <div class="empty-products">No products found.</div>
+      }
+    </div>
+
+    <!-- Load More -->
+    <div class="load-more" *ngIf="!isLoading && filteredProducts.length > 0">
+      <button class="btn-load-more">Load More Products</button>
+    </div>
+  </div>
+</section>

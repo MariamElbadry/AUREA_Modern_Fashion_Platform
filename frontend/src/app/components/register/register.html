@@ -1,0 +1,101 @@
+<div class="container">
+    <div class="card">
+        <div class="left"></div>
+        <div class="right">
+            <div class="content">
+                <div class="logo">AUREA</div>
+                <div class="tagline">
+                    OCCASION WEAR • REIMAGINED
+                </div>
+
+                <h1>Create Account</h1>
+
+                <p class="description">
+                    Join AUREA today and begin your journey into timeless fashion.
+                </p>
+
+                <form (ngSubmit)="onSubmit()">
+                    <div class="form-row">
+                        <div class="group">
+                            <label>First Name</label>
+                            <div class="input-box">
+                                <i class="fa-regular fa-user"></i>
+                                <input type="text" [(ngModel)]="formData.firstName" name="firstName" placeholder="Enter your first name" required>
+                            </div>
+                        </div>
+
+                        <div class="group">
+                            <label>Last Name</label>
+                            <div class="input-box">
+                                <i class="fa-regular fa-user"></i>
+                                <input type="text" [(ngModel)]="formData.lastName" name="lastName" placeholder="Enter your last name" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="group">
+                        <label>Email Address</label>
+                        <div class="input-box">
+                            <i class="fa-regular fa-envelope"></i>
+                            <input type="email" [(ngModel)]="formData.email" name="email" placeholder="Enter your email" required>
+                        </div>
+                    </div>
+
+                    <div class="group">
+                        <label>Password</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" [(ngModel)]="formData.password" name="password" placeholder="Create a password" required>
+                            <i class="fa-regular fa-eye eye"></i>
+                        </div>
+                    </div>
+
+                    <div class="group">
+                        <label>Confirm Password</label>
+                        <div class="input-box">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" [(ngModel)]="formData.confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
+                            <i class="fa-regular fa-eye eye"></i>
+                        </div>
+                    </div>
+
+                    <div class="group">
+                        <label>I want to register as</label>
+                        <div class="input-box">
+                            <i class="fa-regular fa-user"></i>
+                            <select [(ngModel)]="formData.role" name="role" required>
+                                <option value="customer">Customer</option>
+                                <option value="designer">Designer</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="terms">
+                        <label class="terms-checkbox">
+                            <input type="checkbox" [(ngModel)]="formData.termsAccepted" name="termsAccepted">
+                            <span>I agree to the <a href="#">Terms & Conditions</a></span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="signin-btn" [disabled]="isLoading">
+                        {{ isLoading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT' }}
+                    </button>
+                </form>
+
+                <div class="error-message" *ngIf="errorMessage">
+                    <span>{{ errorMessage }}</span>
+                    <a *ngIf="errorMessage.includes('already exists')" routerLink="/auth"> Sign in here</a>
+                </div>
+
+                <div class="success-message" *ngIf="successMessage">
+                    {{ successMessage }}
+                </div>
+
+                <div class="signup">
+                    Already have an account?
+                    <a routerLink="/auth">Sign in</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,42 @@
+<section class="designers-section">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="crumb">The creators</div>
+        <h2>Our<br/>Designers</h2>
+      </div>
+      <p>Discover the talented designers behind our curated collection. Each brings their unique vision and craftsmanship to create timeless pieces for the modern woman.</p>
+    </div>
+
+    <div class="loading" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Discovering designers...</p>
+    </div>
+
+    <div class="error" *ngIf="errorMessage && !isLoading">
+      <p>{{ errorMessage }}</p>
+    </div>
+
+    <div class="designers-grid" *ngIf="!isLoading && !errorMessage">
+      <div class="no-designers" *ngIf="designers.length === 0">
+        <p>No designers registered yet.</p>
+      </div>
+
+      <div class="designer-card" *ngFor="let designer of designers">
+        <div class="card-top">
+          <div class="designer-avatar">
+            <span>{{ designer.firstName?.charAt(0) || 'D' }}{{ designer.lastName?.charAt(0) || '' }}</span>
+          </div>
+          <div class="card-badge">Designer</div>
+        </div>
+        <div class="designer-info">
+          <h3>{{ designer.firstName }} {{ designer.lastName }}</h3>
+          <p class="designer-email">{{ designer.email }}</p>
+          <div class="card-divider"></div>
+          <p class="designer-since">Member since {{ designer.createdAt | date:'yyyy' }}</p>
+        </div>
+        <button class="view-btn">View Portfolio</button>
+      </div>
+    </div>
+  </div>
+</section>

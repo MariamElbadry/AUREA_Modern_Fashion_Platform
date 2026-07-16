@@ -1,0 +1,22 @@
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="crumb">Shop / Categories</div>
+        <h2>The wardrobe,<br/>categorised.</h2>
+      </div>
+      <p>From tailored trousers to bridal lace — every category is curated by our editors and shipped with complimentary alterations on qualifying pieces.</p>
+    </div>
+    <div class="grid">
+      <button class="cat" *ngFor = "let category of categories; let i = index; trackBy: trackitem" (click)="viewCategory(category.Id)">
+        <div class="cat-img">
+          <img [src]="category.imageUrl" [alt]="category.name">
+        </div>
+        <div class="cat-meta">
+          <h3>{{category.name}}</h3>
+          <p>{{category.description}}</p>
+        </div>
+      </button>
+    </div>
+  </div>
+</section>
